@@ -18,10 +18,10 @@ FB.setAccessToken(process.env.FB_KEY)
  * @param {Object} context: Provided by Netlify if Identity is enabled, contains a `clientContext` object with `identity` and `user` properties.
  * @param {netlifyCallback} callback: Defined like callback in an AWS Lambda function, used to return either an error, or a response object.
  */
-const sourceFB = (_event, _context, callback) => {
-  const token = event.headers.Authorization.replace(/Bearer/i, "").trim()
-  jwt.verify(token, process.env.JWT_SECRET, error => {
-    if (!error) {
+const sourceFB = (event, _context, callback) => {
+  // const token = event.headers.Authorization.replace(/Bearer/i, "").trim()
+  // jwt.verify(token, process.env.JWT_SECRET, (error) => {
+    // if (!error) {
       gh.init()
         .then(() => {
           FB.api(
@@ -33,12 +33,12 @@ const sourceFB = (_event, _context, callback) => {
                 { method: "get", relative_url: "/techvista18/events" },
               ],
             },
-            function(response) {
+            function (response) {
               const filesToPush = []
 
-              response.forEach(item => {
+              response.forEach((item) => {
                 const file = JSON.parse(item.body)
-                file.data.forEach(event => {
+                file.data.forEach((event) => {
                   const date = moment(event.start_time).format("YYYY-MM-DD")
                   const id = uuidv4()
 
@@ -76,13 +76,13 @@ const sourceFB = (_event, _context, callback) => {
             }
           )
         })
-        .catch(err => {
+        .catch((err) => {
           callback(err)
         })
-    } else {
-      console.log(error)
-    }
-  })
+  //   } else {
+  //     console.log(error)
+  //   }
+  // })
 }
 
 module.exports.handler = sourceFB

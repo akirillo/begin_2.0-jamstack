@@ -2,6 +2,7 @@
  * @callback netlifyCallback
  */
 
+const sha = require("sha1");
 const jwt = require("jsonwebtoken")
 const moment = require("moment")
 const { v4: uuidv4 } = require("uuid")
@@ -15,13 +16,13 @@ const axios = require("axios")
  * @param {netlifyCallback} callback: Defined like callback in an AWS Lambda function, used to return either an error, or a response object.
  */
 const sourceCourses = (event, _context, callback) => {
-  const token = event.headers.authorization.replace(/Bearer/i, "").trim()
-  jwt.verify(token, process.env.JWT_SECRET, (error) => {
-    if (!error) {
+  // const token = event.headers.authorization.replace(/Bearer/i, "").trim()
+  // jwt.verify(token, process.env.JWT_SECRET, (error) => {
+    // if (!error) {
       gh.init()
         .then(() => {
           return gh.getConfigs("courses")
-        })
+        }) 
         .then((courseConfigs) => {
           const coursePromises = []
 
@@ -29,7 +30,7 @@ const sourceCourses = (event, _context, callback) => {
             coursePromises.push(
               axios({
                 method: "GET",
-                url: `https://apis.berkeley.edu/uat/sis/v2/courses/${courseConfig.id}`,
+                url: `https://apis.berkeley.edu/uat/sis/v2/courses/${courseConfig.id}?id-type=cms-version-independent-id`,
                 params: {
                   "id-type": "cms-version-independent-id",
                 },
@@ -56,7 +57,7 @@ const sourceCourses = (event, _context, callback) => {
             const { course } = courseObj
             const { courseKey } = courseObj
 
-            const id = uuidv4()
+            const id = sha(course.description);
 
             filesToPush.push({
               content: Buffer.from(
@@ -88,10 +89,10 @@ const sourceCourses = (event, _context, callback) => {
         .catch((err) => {
           callback(err)
         })
-    } else {
-      console.log(error)
-    }
-  })
+    // } else {
+    //   console.log(error)
+    // }
+  // })
 }
 
 module.exports.handler = sourceCourses

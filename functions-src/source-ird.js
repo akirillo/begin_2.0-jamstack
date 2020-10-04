@@ -2,6 +2,7 @@
  * @callback netlifyCallback
  */
 
+const sha = require("sha1")
 const _ = require("lodash")
 const axios = require("axios")
 const moment = require("moment")
@@ -20,9 +21,9 @@ const gh = require("./github")
  * @param {netlifyCallback} callback: Defined like callback in an AWS Lambda function, used to return either an error, or a response object.
  */
 const sourceIRD = (event, _context, callback) => {
-  const token = event.headers.authorization.replace(/Bearer/i, "").trim()
-  jwt.verify(token, process.env.JWT_SECRET, (error) => {
-    if (!error) {
+  // const token = event.headers.authorization.replace(/Bearer/i, "").trim()
+  // jwt.verify(token, process.env.JWT_SECRET, (error) => {
+    // if (!error) {
       gh.init()
         .then(() => {
           axios
@@ -42,7 +43,7 @@ const sourceIRD = (event, _context, callback) => {
               ]
 
               resourcesResponse.data.forEach((resource) => {
-                const id = uuidv4()
+                const id = sha(resource.desc);
                 const date = moment(resource.updated_at).format("YYYY-MM-DD")
                 const tags = _.flatMap(tagFields, (field) =>
                   _.map(
@@ -66,7 +67,7 @@ const sourceIRD = (event, _context, callback) => {
               })
 
               gh.pushFiles(
-                "Testing IRD content pushing to the proper folder with id",
+                `Courses content push on ${moment().format("YYYY-MM-DD")}`,
                 filesToPush
               ).then(() => {
                 callback(null, {
@@ -79,10 +80,10 @@ const sourceIRD = (event, _context, callback) => {
         .catch((err) => {
           callback(err)
         })
-    } else {
-      console.log(error)
-    }
-  })
+  //   } else {
+  //     console.log(error)
+  //   }
+  // })
 }
 
 module.exports.handler = sourceIRD

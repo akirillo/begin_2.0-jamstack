@@ -14,6 +14,7 @@ import "slick-carousel/slick/slick-theme.css"
 export const query = graphql`
   query rssQuery {
     allRssJson(sort: { fields: date, order: DESC }) {
+      distinct(field: title)
       nodes {
         author
         date
@@ -36,12 +37,12 @@ export const query = graphql`
 export default function ArticlesPage({ data }) {
   const allArticles = data.allRssJson.nodes
   const allWeekArticles = allArticles.filter((article) =>
-    moment(article.date).isSame(moment(), "week")
+    moment(article.date).isSame(moment(), "month")
   )
   const allMonthArticles = allArticles.filter(
     (article) =>
-      moment(article.date).isSame(moment(), "month") &&
-      !moment(article.date).isSame(moment(), "week")
+      moment(article.date).isSame(moment(), "year") &&
+      !moment(article.date).isSame(moment(), "month")
   )
   const [weekArticles, setWeekArticles] = useState(allWeekArticles)
   const [monthArticles, setMonthArticles] = useState(allMonthArticles)
@@ -64,15 +65,15 @@ export default function ArticlesPage({ data }) {
     setWeekArticles(
       allWeekArticles.filter(
         (article) =>
-          moment(article.date).isSame(moment(), "week") &&
+          moment(article.date).isSame(moment(), "month") &&
           (activeTags.length === 0 || activeTags.includes(article.feedKey))
       )
     )
     setMonthArticles(
       allMonthArticles.filter(
         (article) =>
-          moment(article.date).isSame(moment(), "month") &&
-          !moment(article.date).isSame(moment(), "week") &&
+          moment(article.date).isSame(moment(), "year") &&
+          !moment(article.date).isSame(moment(), "month") &&
           (activeTags.length === 0 || activeTags.includes(article.feedKey))
       )
     )
@@ -98,7 +99,7 @@ export default function ArticlesPage({ data }) {
           </Chip>
         ))}
       </Flex>
-      <Heading sx={{ mb: 3 }}>This Week:</Heading>
+      <Heading sx={{ mb: 3 }}>This Month:</Heading>
       {weekArticles.length > 0 ? (
         <Slider
           dots={true}
@@ -115,15 +116,15 @@ export default function ArticlesPage({ data }) {
           ))}
         </Slider>
       ) : (
-        <Heading as="h3">No articles this week!</Heading>
+        <Heading as="h3">No articles this month!</Heading>
       )}
-      <Heading sx={{ mt: 5, mb: 3 }}>This Month:</Heading>
+      <Heading sx={{ mt: 5, mb: 3 }}>This Year:</Heading>
       {monthArticles.length > 0 ? (
         monthArticles.map((article) => (
           <ArticleCard key={article.id} article={article} />
         ))
       ) : (
-        <Heading as="h3">No articles this month!</Heading>
+        <Heading as="h3">No articles this year!</Heading>
       )}
     </Layout>
   )
