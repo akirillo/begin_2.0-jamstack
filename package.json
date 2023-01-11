@@ -22,7 +22,7 @@
     "gatsby-transformer-json": "^2.4.11",
     "gatsby-transformer-sharp": "^2.5.13",
     "github-api": "^3.3.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.20",
     "moment": "^2.27.0",
     "netlify-cms-app": "^2.12.19",
